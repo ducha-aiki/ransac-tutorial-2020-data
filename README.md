@@ -22,7 +22,7 @@ The code for running OpenCV RANSACs evaluation on the validation set is coming s
 
 The test data (only input) is coming soon.
 
-[**PyTorch data loader**](hdf5reader.py)
+[**PyTorch data loader for hdf5 files**](hdf5reader.py)
 
 
 # Data for training and validation of PnP methods
