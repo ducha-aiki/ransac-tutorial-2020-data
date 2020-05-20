@@ -40,7 +40,7 @@ class H5DataReader:
 class DummyH5Dataset(Dataset):
     def __init__(self, path):
         self.path = path
-        self.reader = reader
+        self.reader = None
 
     def __getitem__(self, idx):
         ## This is important to make hdf5 work with multiprocessing
