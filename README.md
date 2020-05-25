@@ -30,7 +30,7 @@ The test data (only input) is coming soon.
 Training and validation data you can download from http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-PnP.tar.gz (612Mb).
 The data is from [EPOS](http://cmp.felk.cvut.cz/epos/) datasset. 
 
-The description of the dataset format and parser to read the data is in [this notebook](PnP parse data.ipynb)
+The description of the dataset format and parser to read the data is in [this notebook](https://github.com/ducha-aiki/ransac-tutorial-2020-data/blob/master/PnP%20parse%20data.ipynb)
 
 
 
