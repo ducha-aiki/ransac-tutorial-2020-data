@@ -30,26 +30,9 @@ The test data (only input) is coming soon.
 Training and validation data you can download from http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-PnP.tar.gz (612Mb).
 The data is from [EPOS](http://cmp.felk.cvut.cz/epos/) datasset. 
 
-The format is as follows.  There is one txt file for each object model in each image. Note that there may be multiple instances of an object model in an image; e.g. an image from T-LESS may show multiple fuses of the same type. A txt file contains the following:
-
-----------------------------------------------------------------
-The 1st line: scene_id image_id object_id
-These ID's can be used to find the associated test image, which is at "dataset/test/scene_id/rgb/image_id.png", where dataset is lmo, tless, or ycbv (the datasets can be downloaded from the BOP web). The mapping of object_id to objects can be seen in Figure 1 of the BOP paper.
-
-The 2nd to 4th line: 3x3 intrinsic matrix K.
-
-The 5th line: The number N of ground truth poses (i.e. the number of instances of object_id visible in the image). The poses are saved as 3x4 matrices on the following 3N lines. Each pose P defines the transformation from the model coordinate system to the camera coordinate system: X_c = P * X_m, where X_c and X_m is a 3D point in the camera and the model coordinate system respectively. The 3D object models can be downloaded from the BOP web.
-
-Then follows a line with the number M of predicted 2D-3D correspondences, each is saved on one line with this format:
-u v x y z px_id frag_id conf conf_obj conf_frag
-where (u, v) is the 2D image location, (x, y, z) is the predicted corresponding 3D location in the model coordinate system, px_id is the ID of a 2D location -- all correspondences with the same (u, v) have the same px_id and vice versa (note that EPOS produces possibly multiple correspondences at each pixel), frag_id is the ID of the corresponding surface fragment, and conf = conf_obj * conf_frag, where conf_obj is the predicted confidence of object object_id being visible at (u, v), and conf_frag is the predicted confidence of fragment frag_id of object object_id being visible at (u, v).
-
-Then follows a line with the number O of the GT correspondences, each is saved on one line with this format:
-u v x y z px_id frag_id gt_id
-where (u, v) is the 2D image location, (x, y, z) is the corresponding GT 3D location in the model coordinate system, px_id is the ID of a 2D location (note that there is always only one GT correspondence at each pixel), frag_id is the ID of the corresponding surface fragment, and gt_id is the ID of the GT pose (0-based indexing).
+The description of the dataset format and parser to read the data is in [this notebook](PnP parse data.ipynb)
 
 
-**The example of data parset is coming soon**
 
 # Data for hyperparameter tuning for homography. No training data
 
