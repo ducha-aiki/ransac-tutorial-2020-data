@@ -36,7 +36,15 @@ The description of the dataset format and parser to read the data is in [this no
 
 # Data for hyperparameter tuning for homography. No training data
 
-Coming soon (expect on  May 20-22)
+Test(without GT) and validation data you can download from http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/homography.tar.gz
+
+
+Jupyter notebook, showing the format of the data and toy evaluation example is [here](parse_H_data.ipynb).
+
+
+Your methods can use as an input:
+
+x, y, matching score 
 
 
 # Other cases (3d point cloud regstration, etc)
