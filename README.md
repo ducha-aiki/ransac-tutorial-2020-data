@@ -60,14 +60,21 @@ The data is organised as follows:
 - Plotter code pc_plotter(fname_pc1, fname_pc2, fname_corr) requires file names for a pair of point clouds and their correspondences.
 
 As an example, for Arch, you could run in Matlab
+```
 pc_plotter('../arch/keypoint_s1.pcd', '../arch/keypoint_s2.pcd', '../arch/corr_s1_s2.txt')
+```
 to display the 3D correspondences.
 
+The inlier thresholds are ... (TBA)
+
 The ground truth transformation parameters are available here:
+
 https://cloudstor.aarnet.edu.au/plus/s/mDMT09jEk0tZTrL
+
 Use a text editor to open the files.
 
 This data was sourced from Photogrammetry and Remote Sensing Group at ETH Zurich:
+
 https://prs.igp.ethz.ch/research/completed_projects/automatic_registration_of_point_clouds.html
 
 If you use the data in any publication, please credit the original authors properly.
@@ -75,13 +82,19 @@ If you use the data in any publication, please credit the original authors prope
 ## Point clouds from Microsoft 7 Scenes data.
 
 Download dataset here:
+
 https://cloudstor.aarnet.edu.au/plus/s/9KQBYVFSjYn0PDH
 
 There are two instances in this dataset.
 
-In Matlab, run plot_7scenes.m. The inlier threshold is inst.conf.th.
+In Matlab, run
+```
+plot_7scenes.m
+```
+The inlier threshold is inst.conf.th.
 
 This data was sourced from Microsoft RGB-D Dataset 7-Scenes:
+
 https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/
 
 If you use the data in any publication, please credit the original authors properly.
@@ -93,9 +106,14 @@ https://cloudstor.aarnet.edu.au/plus/s/ko1F2tFQzAyG1I0
 
 There are two instances in this dataset.
 
-In Matlab, run plot_lai.m. The inlier threshold is inst.conf.th.
+In Matlab, run
+```
+plot_lai.m
+```
+The inlier threshold is inst.conf.th.
 
 This data was sourced from RGB-D Object Dataset from University of Washington:
+
 https://rgbd-dataset.cs.washington.edu/
 
 If you use the data in any publication, please credit the original authors properly.
