@@ -58,9 +58,8 @@ https://cloudstor.aarnet.edu.au/plus/s/229Wnoez2c35Cmw
 The data is organised as follows:
 - For each scene, there is a sequence of T lidar scans { keypoint_s[t].pcd }, where t=1,...,T.
 - Correspondences are available for only consecutive scans { corr_s[t]_s[t+1].txt }.
-- Plotter code pc_plotter(fname_pc1, fname_pc2, fname_corr) requires file names for a pair of point clouds and their correspondences.
 
-As an example, for Arch, you could run in Matlab
+In the zip package, there is a Matlab function ``pc_plotter(fname_pc1, fname_pc2, fname_corr)`` to plot pairs of point clouds and their 3D correspondences. The function requires file names for a pair of point clouds and their correspondences. As an example, for Arch, you could run in Matlab
 ```
 pc_plotter('../arch/keypoint_s1.pcd', '../arch/keypoint_s2.pcd', '../arch/corr_s1_s2.txt')
 ```
@@ -88,11 +87,7 @@ https://cloudstor.aarnet.edu.au/plus/s/9KQBYVFSjYn0PDH
 
 There are two instances in this dataset.
 
-In Matlab, run
-```
-plot_7scenes.m
-```
-The inlier threshold is `inst.conf.th` and the ground truth is `GT`.
+In the zip package, there is a Matlab script `plot_7scenes.m` to plot the point clouds and their correspondences. After you run the script, the inlier threshold and ground truth transformation are available respectively in `inst.conf.th` and `GT`.
 
 This data was sourced from Microsoft RGB-D Dataset 7-Scenes:
 
@@ -110,11 +105,7 @@ https://cloudstor.aarnet.edu.au/plus/s/ko1F2tFQzAyG1I0
 
 There are two instances in this dataset.
 
-In Matlab, run
-```
-plot_lai.m
-```
-The inlier threshold is `inst.conf.th` and the ground truth is `GT`.
+In the zip package, there is a Matlab script `plot_lai.m` to plot the point clouds and their correspondences. After you run the script, the inlier threshold and ground truth transformation are available respectively in `inst.conf.th` and `GT`.
 
 This data was sourced from RGB-D Object Dataset from University of Washington:
 
