@@ -40,13 +40,27 @@ Test(without GT) and validation data you can download from http://cmp.felk.cvut.
 
 
 Jupyter notebook, showing the format of the data and toy evaluation example is [here](parse_H_data.ipynb).
-
-
 Your methods can use as an input:
 
 x, y, matching score 
 
-To tune hyperparameters on the validation set and create test set prediction with OpenCV RANSAC, run the following script [create_opencv_submission_example.py](create_opencv_submission_example.py)
+The evaluation metric is mean averacy accuracy over set of thresholds. And the thresholded metric is MAE: mean absolute error on jointly visible part of the both images.
+For more details see [metrics.py](metrics.py)
+
+
+## Example submission
+
+To tune hyperparameters on the validation set and create test set prediction with OpenCV RANSAC, run the following script [create_opencv_homography_submission_example.py](create_opencv_homography_submission_example.py)
+
+It will run hyper parameter search on the validation set and then creates two files: homography_opencv_EVD_submission.h5 and homography_opencv_HPatchesSeq_submission.h5
+Each of them has the same format as ground truth homography: h5 file with image pairs names as the key and [3x3] homography as an output.
+
+
+```bash
+python -utt create_opencv_homography_submission_example.py
+>
+
+```
 
 
 # Data for 3D point cloud stitching

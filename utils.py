@@ -18,6 +18,16 @@ def load_h5(filename):
         print('Cannot find file {}'.format(filename))
     return dict_to_load
 
+def save_h5(dict_to_save, filename):
+    '''Saves dictionary to HDF5 file'''
+
+    with h5py.File(filename, 'w') as f:
+        for key in dict_to_save:
+            #if 'img' in key:
+            #    continue
+            #print (key)
+            f.create_dataset(key, data=dict_to_save[key])
+
 def normalize_keypoints(keypoints, K):
     '''Normalize keypoints using the calibration data.'''
 
