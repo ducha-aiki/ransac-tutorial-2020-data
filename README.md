@@ -92,7 +92,7 @@ In Matlab, run
 ```
 plot_7scenes.m
 ```
-The inlier threshold is inst.conf.th.
+The inlier threshold is `inst.conf.th` and the ground truth is `GT`.
 
 This data was sourced from Microsoft RGB-D Dataset 7-Scenes:
 
@@ -114,7 +114,7 @@ In Matlab, run
 ```
 plot_lai.m
 ```
-The inlier threshold is inst.conf.th.
+The inlier threshold is `inst.conf.th` and the ground truth is `GT`.
 
 This data was sourced from RGB-D Object Dataset from University of Washington:
 
