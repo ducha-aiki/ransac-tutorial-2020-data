@@ -46,8 +46,61 @@ Your methods can use as an input:
 
 x, y, matching score 
 
+# Data for 3D point cloud stitching
 
-# Other cases (3d point cloud regstration, etc)
+
+## Point clouds from ETHZ Photogrammetry and Remote Sensing Group
+
+Download dataset here:
+https://cloudstor.aarnet.edu.au/plus/s/229Wnoez2c35Cmw
+
+The data is organised as follows:
+- For each scene, there is a sequence of T lidar scans { keypoint_s[t].pcd }, where t=1,...,T.
+- Correspondences are available for only consecutive scans { corr_s[t]_s[t+1].txt }.
+- Plotter code pc_plotter(fname_pc1, fname_pc2, fname_corr) requires file names for a pair of point clouds and their correspondences.
+
+As an example, for Arch, you could run in Matlab
+pc_plotter('../arch/keypoint_s1.pcd', '../arch/keypoint_s2.pcd', '../arch/corr_s1_s2.txt')
+to display the 3D correspondences.
+
+The ground truth transformation parameters are available here:
+https://cloudstor.aarnet.edu.au/plus/s/mDMT09jEk0tZTrL
+Use a text editor to open the files.
+
+This data was sourced from Photogrammetry and Remote Sensing Group at ETH Zurich:
+https://prs.igp.ethz.ch/research/completed_projects/automatic_registration_of_point_clouds.html
+
+If you use the data in any publication, please credit the original authors properly.
+
+## Point clouds from Microsoft 7 Scenes data.
+
+Download dataset here:
+https://cloudstor.aarnet.edu.au/plus/s/9KQBYVFSjYn0PDH
+
+There are two instances in this dataset.
+
+In Matlab, run plot_7scenes.m. The inlier threshold is inst.conf.th.
+
+This data was sourced from Microsoft RGB-D Dataset 7-Scenes:
+https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/
+
+If you use the data in any publication, please credit the original authors properly.
+
+# Data for 3D object detection
+
+## RGBD Object Dataset
+https://cloudstor.aarnet.edu.au/plus/s/ko1F2tFQzAyG1I0
+
+There are two instances in this dataset.
+
+In Matlab, run plot_lai.m. The inlier threshold is inst.conf.th.
+
+This data was sourced from RGB-D Object Dataset from University of Washington:
+https://rgbd-dataset.cs.washington.edu/
+
+If you use the data in any publication, please credit the original authors properly.
+
+# Other cases
 
 TBA if any.
 
