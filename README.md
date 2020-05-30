@@ -46,6 +46,9 @@ Your methods can use as an input:
 
 x, y, matching score 
 
+To tune hyperparameters on the validation set and create test set prediction with OpenCV RANSAC, run the following script [create_opencv_submission_example.py](create_opencv_submission_example.py)
+
+
 # Data for 3D point cloud stitching
 
 

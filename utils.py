@@ -197,3 +197,19 @@ def draw_everything(img1, img2, pts1_good, pts2_good, F_gt):
     plt.subplot(122)
     plt.imshow(img3gt)
     return
+
+
+def get_h_imgpair(key, dataset, split = 'val'):
+    DIR = 'homography'
+    if dataset == 'EVD':
+        img1_fname = f'{DIR}/{dataset}/{split}/imgs/1/' + key.split('-')[0] + '.png'
+        img2_fname = f'{DIR}/{dataset}/{split}/imgs/2/' + key.split('-')[0] + '.png'
+    elif dataset == 'HPatchesSeq':
+        img1_fname = f'{DIR}/{dataset}/{split}/imgs/{key[:-4]}/1.ppm'
+        img2_fname = f'{DIR}/{dataset}/{split}/imgs/{key[:-4]}/{key[-1]}.ppm'
+    else:
+        raise ValueError ('Unknown dataset, try EVD or HPatchesSeq')
+    img1 = cv2.cvtColor(cv2.imread(img1_fname), cv2.COLOR_BGR2RGB)
+    img2 = cv2.cvtColor(cv2.imread(img2_fname), cv2.COLOR_BGR2RGB)
+    return img1, img2
+
