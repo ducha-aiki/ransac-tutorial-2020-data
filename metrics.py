@@ -34,3 +34,16 @@ def calc_mAA(MAEs, ths = np.logspace(np.log2(0.5), np.log2(10), 10, base=2.0)):
             cur_results.append(np.array(acc).mean())
         res[ds_name] = np.array(cur_results).mean()
     return res
+
+def calc_mAA_FE(ang_errors, ths = np.deg2rad(np.linspace(1.0, 10., 10))):
+    res = {}
+    for ds_name, MAEs_cur in ang_errors.items():
+        cur_results = []
+        for k, MAE in MAEs_cur.items():
+            acc = []
+            for th in ths:
+                A = (MAE <= th).astype(np.float32).mean()
+                acc.append(A)
+            cur_results.append(np.array(acc).mean())
+        res[ds_name] = np.array(cur_results).mean()
+    return res

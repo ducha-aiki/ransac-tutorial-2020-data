@@ -15,14 +15,19 @@ The data comes from train and validation set of the [CVPR IMW 2020 PhotoTourism 
 Jupyter notebook, showing the format of the data and toy evaluation example is [here](parse_EF_data.ipynb).
 
 
-
 Your methods can use as an input:
 
 x, y, matching score for fundamental matrix case 
 
 and x,y, matching score, calibration matrices K1, K2 for essential matrix case.
 
-The code for running OpenCV RANSACs evaluation on the validation set is coming soon.
+The code for running OpenCV RANSACs evaluation is [here](create_opencv_F_submission_example.py)
+
+```bash
+python -utt create_opencv_F_submission_example.py
+
+```
+
 
 The test data is here http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-EF-Test.tar
 
