@@ -3,8 +3,12 @@
 # Data for epipolar geometry training and validation
 
 Training and validation data you can download from http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-EF.tar
-
+It was obtained with RootSIFT features and mutual nearest neighbour matching.
 12 scenes, 100k image pairs each, so 1.2M cases for training, 86 Gb.
+
+
+Correspondences, which are obtained without mutual nearest neighbor check are available from [here](http://ptak.felk.cvut.cz/personal/mishkdmy/CVPR2020-RANSAC-Tutorial/RANSAC-Tutorial-Data-uni.tar), 349 Gb.
+
 The data comes from train and validation set of the [CVPR IMW 2020 PhotoTourism challenge](https://vision.uvic.ca/image-matching-challenge/data/)
 
 
