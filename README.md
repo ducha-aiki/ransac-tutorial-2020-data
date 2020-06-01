@@ -20,7 +20,7 @@ and x,y, matching score, calibration matrices K1, K2 for essential matrix case.
 
 The code for running OpenCV RANSACs evaluation on the validation set is coming soon.
 
-The test data (only input) is coming soon.
+The test data is here http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-EF-Test.tar
 
 [**PyTorch data loader for hdf5 files**](hdf5reader.py)
 
