@@ -24,12 +24,17 @@ def create_F_submission_cv2(split = 'val', inlier_th = 1.0, match_th = 0.8):
             ms = matches_scores[k].reshape(-1)
             mask = ms <= match_th
             tentatives = m[mask]
+            tentative_idxs = np.arange(len(mask))[mask]
             src_pts = tentatives[:,:2]
             dst_pts = tentatives[:,2:]
             F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, cv2.RANSAC, 
                                          inlier_th, confidence=0.9999)
             out_model[seq][k] = F
-            inls[seq][k] = mask_inl
+            final_inliers = np.array([False] * len(mask))
+            if F is not None:
+                for i, x in enumerate(mask_inl):
+                    final_inliers[tentative_idxs[i]] = x
+            inls[seq][k] = final_inliers
     return  out_model, inls
 
 def evaluate_results(submission, split = 'val'):
