@@ -22,7 +22,7 @@ def get_single_result(ms, m, method, params):
     tentative_idxs = np.arange(len(mask))[mask]
     src_pts = tentatives[:,:2]
     dst_pts = tentatives[:,2:]
-    if len(dst_pts) < 7:
+    if len(dst_pts) <= 8:
         return np.eye(3), np.array([False] * len(mask))
     if method == 'cv2f':
         F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, 
