@@ -147,7 +147,10 @@ if __name__ == '__main__':
             print (f" mAA {seq} = {mAA[seq]:.5f}")
             save_h5({"mAA": mAA[seq]}, out_maa_fname)
             all_maas.append(mAA[seq])
-    print (f" mAA total = {(np.array(all_maas)).mean():.5f}")
+    out_maa_final_fname = os.path.join(OUT_DIR, f'maa_FINAL.h5')
+    final_mAA = (np.array(all_maas)).mean()
+    print (f" mAA total = {final_mAA:.5f}")
+    save_h5({"mAA": final_mAA}, out_maa_final_fname)
     print ('Done!')
         
 
