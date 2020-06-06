@@ -48,6 +48,8 @@ def get_single_result(ms, m, method, params):
                         residual_threshold=params['inl_th'],
                         max_trials=params['maxiter'],
                         stop_probability=params['conf'])
+        mask_F = mask_F.astype(bool).flatten()
+        F = F.params
     else:
         raise ValueError('Unknown method')
     
