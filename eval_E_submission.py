@@ -28,18 +28,18 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
         img_id2 = k.split('-')[1]
         K1 = K1_K2[k][0][0]
         K2 = K1_K2[k][0][1]
-        E_cv_from_F = E_pred[k]
+        E = E_pred[k].astype(np.float64)
         R1 = R[img_id1]
         R2 = R[img_id2]
         T1 = T[img_id1]
         T2 = T[img_id2]
         dR = np.dot(R2, R1.T)
         dT = T2 - np.dot(dR, T1)
-        pts1 = m[inl_mask[k],:2] # coordinates in image 1
-        pts2 = m[inl_mask[k],2:]  # coordinates in image 2
-        p1n = normalize_keypoints(pts1, K1)
-        p2n = normalize_keypoints(pts2, K2)
-        ang_errors[k] = max(eval_essential_matrix(p1n, p2n, E_cv_from_F, dR, dT))
+        pts1 = m[inl_mask[k].astype(bool),:2] # coordinates in image 1
+        pts2 = m[inl_mask[k].astype(bool),2:]  # coordinates in image 2
+        p1n = normalize_keypoints(pts1, K1).astype(np.float64)
+        p2n = normalize_keypoints(pts2, K2).astype(np.float64)
+        ang_errors[k] = max(eval_essential_matrix(p1n, p2n, E.reshape(3,3), dR, dT))
     return ang_errors
 
 
