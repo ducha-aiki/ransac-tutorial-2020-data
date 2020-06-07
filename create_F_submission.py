@@ -20,9 +20,9 @@ def get_single_result(ms, m, method, params):
     mask = ms <= params['match_th']
     tentatives = m[mask]
     tentative_idxs = np.arange(len(mask))[mask]
-    src_pts = tentatives[:,:2]
-    dst_pts = tentatives[:,2:]
-    if len(dst_pts) <= 8:
+    src_pts = tentatives[:, :2]
+    dst_pts = tentatives[:, 2:]
+    if tentatives.shape[0] <= 10:
         return np.eye(3), np.array([False] * len(mask))
     if method == 'cv2f':
         F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, 
@@ -42,14 +42,19 @@ def get_single_result(ms, m, method, params):
                                                 max_iters = params['maxiter'],
                                                 enable_degeneracy_check=True)
     elif method  == 'sklearn':
-        F, mask_inl = skransac((src_pts, dst_pts),
+        try:
+            #print(src_pts.shape, dst_pts.shape)
+            F, mask_inl = skransac([src_pts, dst_pts],
                         FundamentalMatrixTransform,
                         min_samples=8,
                         residual_threshold=params['inl_th'],
                         max_trials=params['maxiter'],
                         stop_probability=params['conf'])
-        mask_F = mask_F.astype(bool).flatten()
-        F = F.params
+            mask_inl = mask_inl.astype(bool).flatten()
+            F = F.params
+        except Exception as e:
+            print ("Fail!", e)
+            return np.eye(3), np.array([False] * len(mask))
     else:
         raise ValueError('Unknown method')
     
