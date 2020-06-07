@@ -12,18 +12,6 @@ import argparse
 
 
         
-def create_F_submission(IN_DIR, seq,  method, params = {}):
-    out_model = {}
-    inls = {}
-    matches = load_h5(f'{IN_DIR}/{seq}/matches.h5')
-    matches_scores = load_h5(f'{IN_DIR}/{seq}/match_conf.h5')
-    keys = [k for k in matches.keys()]
-    results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
-    for i, k in enumerate(keys):
-        v = results[i]
-        out_model[k] = v[0]
-        inls[k] = v[1]
-    return  out_model, inls
 
 def evaluate_results(IN_DIR, seq,  models, inliers):
     ang_errors = {}
@@ -31,20 +19,16 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
     K1_K2 = load_h5(f'{IN_DIR}/{seq}/K1_K2.h5')
     R = load_h5(f'{IN_DIR}/{seq}/R.h5')
     T = load_h5(f'{IN_DIR}/{seq}/T.h5')
-    F_pred, inl_mask = models, inliers
+    E_pred, inl_mask = models, inliers
     for k, m in tqdm(matches.items()):
-        if F_pred[k] is None:
+        if E_pred[k] is None:
             ang_errors[k] = 3.14
             continue
         img_id1 = k.split('-')[0]
         img_id2 = k.split('-')[1]
         K1 = K1_K2[k][0][0]
         K2 = K1_K2[k][0][1]
-        try:
-            E_cv_from_F = get_E_from_F(F_pred[k], K1, K2)
-        except:
-            print ("Fail")
-            E = np.eye(3)
+        E_cv_from_F = E_pred[k]
         R1 = R[img_id1]
         R2 = R[img_id2]
         T1 = T[img_id1]
@@ -117,7 +101,7 @@ if __name__ == '__main__':
               "conf": args.conf,
               "match_th": args.match_th
     }
-    problem = 'f'
+    problem = 'e'
     OUT_DIR = get_output_dir(problem, args.split, args.method, params)
     IN_DIR = os.path.join(args.data_dir, args.split) 
     if not os.path.isdir(OUT_DIR):
