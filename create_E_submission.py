@@ -15,12 +15,13 @@ from skimage.transform import EssentialMatrixTransform
 import multiprocessing
 
 from joblib import Parallel, delayed
+import sys
 try:
     from third_party.NM_Net_v2 import NMNET22
     import torch
 except Exception as e:
     print (e)
-    sys.exit(0)
+    #sys.exit(0)
     pass
 
 

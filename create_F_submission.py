@@ -13,7 +13,7 @@ import pydegensac
 from skimage.measure import ransac as skransac
 from skimage.transform import FundamentalMatrixTransform
 import multiprocessing
-
+import sys
 from joblib import Parallel, delayed
 import PIL
 try:
@@ -21,7 +21,7 @@ try:
     import torch
 except Exception as e:
     print (e)
-    sys.exit(0)
+    #sys.exit(0)
     pass
 
 def get_single_result(ms, m, method, params):
