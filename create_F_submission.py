@@ -24,7 +24,7 @@ except Exception as e:
     sys.exit(0)
     pass
 
-def get_single_result(ms, m, method, params):
+def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2  = None):
     mask = ms <= params['match_th']
     tentatives = m[mask]
     tentative_idxs = np.arange(len(mask))[mask]
@@ -38,12 +38,15 @@ def get_single_result(ms, m, method, params):
                                                 params['inl_th'],
                                                 confidence=params['conf'])
     elif method == 'cv2eimg':
+        K1 = compute_T_with_imagesize(w1,h1)
+        K2 = compute_T_with_imagesize(w2,h2)
         src_pts = normalize_keypoints(src_pts, K1)
         dst_pts = normalize_keypoints(dst_pts, K2)
         E, mask_inl = cv2.findEssentialMat(src_pts, dst_pts, 
                                            np.eye(3), cv2.RANSAC, 
                                            threshold=params['inl_th'],
                                            prob=params['conf'])
+        F = np.matmul(np.matmul(K2.T, E), K1)
     elif method  == 'pyransac':
         F, mask_inl = pydegensac.findFundamentalMatrix(src_pts, dst_pts, 
                                                 params['inl_th'],
@@ -105,6 +108,23 @@ def create_F_submission(IN_DIR,seq,  method, params = {}):
             w,h = img.size
             wh[fname] = (w,h)
         results = [get_single_result_nmnet(model, matches_scores[k], matches[k], method, params, *(wh[k.split('-')[0]]), *(wh[k.split('-')[1]])) for k in tqdm(keys) ]
+        for i, k in enumerate(keys):
+            v = results[i]
+            out_model[k] = v[0]
+            inls[k] = v[1]
+    elif method == 'cv2eimg':
+        img_names = set()
+        for k in keys:
+            k1,k2 = k.split('-')
+            img_names.add(k1)
+            img_names.add(k2)
+        img_names = list(img_names)
+        wh = {}
+        for fname in img_names:
+            img = PIL.Image.open(f'{IN_DIR}/{seq}/images/{fname}.jpg')
+            w,h = img.size
+            wh[fname] = (w,h)
+        results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params, *(wh[k.split('-')[0]]), *(wh[k.split('-')[1]]) ) for k in tqdm(keys))
         for i, k in enumerate(keys):
             v = results[i]
             out_model[k] = v[0]
@@ -187,6 +207,7 @@ def grid_search_hypers_opencv(INL_THs = [0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
     return inl_good, match_good, max_MAA
 
 if __name__ == '__main__':
+    supported_methods = ['cv2f','cv2eimg',  'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--split",
@@ -195,7 +216,7 @@ if __name__ == '__main__':
         help='split to run on. Can be val or test')
     parser.add_argument(
         "--method", default='cv2F', type=str,
-        help=' can be cv2f, pyransac, degensac, sklearn, load_dfe' )
+        help=f' can be {supported_methods}' )
     parser.add_argument(
         "--inlier_th",
         default=0.75,
@@ -233,8 +254,8 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2f','cv2eimg', 'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']:
-        raise ValueError('Unknown value for --method')
+    if args.method.lower() not in supported_methods:
+        raise ValueError(f'Unknown value {args.method.lower()} for --method')
     NUM_RUNS = 1
     if args.split == 'test':
         NUM_RUNS = 3
