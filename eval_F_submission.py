@@ -107,7 +107,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2f', 'cv2eimg','pyransac', 'load_dfe', 'nmnet2', 'degensac', 'sklearn', 'cne', 'acne']:
+    if args.method.lower() not in ['cv2f', 'kornia', 'cv2eimg','pyransac', 'load_dfe', 'nmnet2', 'degensac', 'sklearn', 'cne', 'acne']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':

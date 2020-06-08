@@ -36,10 +36,10 @@ def kornia_find_fundamental_wdlt(points1: torch.Tensor,
     least squares ToDo: add citation'''
     F = KG.find_fundamental(points1, points2, weights)
     for i in range(params['maxiter']):
-        error = KF.epipolar.metrics.symmetrical_epipolar_distance(pts1, pts2, F)
+        error = KG.epipolar.metrics.symmetrical_epipolar_distance(points1, points2, F)
         error_norm = TF.normalize(1.0 / (error + 0.1), dim=1, p=params['conf'])
         F = KG.find_fundamental(points1, points2, error_norm)
-    error = KF.epipolar.metrics.symmetrical_epipolar_distance(pts1, pts2, F)
+    error = KG.epipolar.metrics.symmetrical_epipolar_distance(points1, points2, F)
     mask = error <= params['inl_th']
     return F.detach().cpu().numpy().reshape(3,3), mask.detach().cpu().numpy().reshape(-1)
 
@@ -66,13 +66,7 @@ def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2
         pts1 = torch.from_numpy(src_pts).view(1, -1, 2)
         pts2 = torch.from_numpy(dst_pts).view(1, -1, 2)
         weights = torch.from_numpy(1.0-ms).view(1, -1).pow(params['match_th'])
-        F, mask_inl = kornia_find_fundamental_wdlt(pts1, pts2, weights, params)
-        
-        for i in range()
-        F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, 
-                                                cv2.RANSAC, 
-                                                params['inl_th'],
-                                                confidence=params['conf'])
+        F, mask_inl = kornia_find_fundamental_wdlt(pts1.float(), pts2.float(), weights.float(), params)
     elif method == 'cv2eimg':
         K1 = compute_T_with_imagesize(w1,h1)
         K2 = compute_T_with_imagesize(w2,h2)
@@ -243,7 +237,7 @@ def grid_search_hypers_opencv(INL_THs = [0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
     return inl_good, match_good, max_MAA
 
 if __name__ == '__main__':
-    supported_methods = ['cv2f','cv2eimg',  'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']
+    supported_methods = ['kornia', 'cv2f','cv2eimg',  'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--split",
