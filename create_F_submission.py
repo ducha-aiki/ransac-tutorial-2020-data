@@ -19,10 +19,30 @@ import PIL
 try:
     from third_party.NM_Net_v2 import NMNET22
     import torch
+
+    import kornia.geometry as KG
+    import torch.nn.functional as TF
 except Exception as e:
     print (e)
     #sys.exit(0)
     pass
+
+
+def kornia_find_fundamental_wdlt(points1: torch.Tensor,
+                                 points2: torch.Tensor,
+                                 weights: torch.Tensor,
+                                 params) -> torch.Tensor:
+    '''Function, which finds homography via iteratively-reweighted
+    least squares ToDo: add citation'''
+    F = KG.find_fundamental(points1, points2, weights)
+    for i in range(params['maxiter']):
+        error = KF.epipolar.metrics.symmetrical_epipolar_distance(pts1, pts2, F)
+        error_norm = TF.normalize(1.0 / (error + 0.1), dim=1, p=params['conf'])
+        F = KG.find_fundamental(points1, points2, error_norm)
+    error = KF.epipolar.metrics.symmetrical_epipolar_distance(pts1, pts2, F)
+    mask = error <= params['inl_th']
+    return F.detach().cpu().numpy().reshape(3,3), mask.detach().cpu().numpy().reshape(-1)
+
 
 def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2  = None):
     mask = ms <= params['match_th']
@@ -33,6 +53,22 @@ def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2
     if tentatives.shape[0] <= 10:
         return np.eye(3), np.array([False] * len(mask))
     if method == 'cv2f':
+        F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, 
+                                                cv2.RANSAC, 
+                                                params['inl_th'],
+                                                confidence=params['conf'])
+    if method == 'kornia':
+        #mask = ms <= params['match_th']
+        #tentatives = m[mask]
+        #tentative_idxs = np.arange(len(mask))[mask]
+        src_pts = m[:, :2]
+        dst_pts = m[:, 2:]
+        pts1 = torch.from_numpy(src_pts).view(1, -1, 2)
+        pts2 = torch.from_numpy(dst_pts).view(1, -1, 2)
+        weights = torch.from_numpy(1.0-ms).view(1, -1).pow(params['match_th'])
+        F, mask_inl = kornia_find_fundamental_wdlt(pts1, pts2, weights, params)
+        
+        for i in range()
         F, mask_inl = cv2.findFundamentalMat(src_pts, dst_pts, 
                                                 cv2.RANSAC, 
                                                 params['inl_th'],
