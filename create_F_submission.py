@@ -29,6 +29,13 @@ def get_single_result(ms, m, method, params):
                                                 cv2.RANSAC, 
                                                 params['inl_th'],
                                                 confidence=params['conf'])
+    elif method == 'cv2eimg':
+        src_pts = normalize_keypoints(src_pts, K1)
+        dst_pts = normalize_keypoints(dst_pts, K2)
+        E, mask_inl = cv2.findEssentialMat(src_pts, dst_pts, 
+                                           np.eye(3), cv2.RANSAC, 
+                                           threshold=params['inl_th'],
+                                           prob=params['conf'])
     elif method  == 'pyransac':
         F, mask_inl = pydegensac.findFundamentalMatrix(src_pts, dst_pts, 
                                                 params['inl_th'],
@@ -71,11 +78,15 @@ def create_F_submission(IN_DIR,seq,  method, params = {}):
     matches = load_h5(f'{IN_DIR}/{seq}/matches.h5')
     matches_scores = load_h5(f'{IN_DIR}/{seq}/match_conf.h5')
     keys = [k for k in matches.keys()]
-    results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
-    for i, k in enumerate(keys):
-        v = results[i]
-        out_model[k] = v[0]
-        inls[k] = v[1]
+    if method != 'load_dfe':
+        results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
+        for i, k in enumerate(keys):
+            v = results[i]
+            out_model[k] = v[0]
+            inls[k] = v[1]
+    else:
+        out_model = load_h5(f'4Dmytro/F_dfe_{seq}_submission.h5')
+        inls = load_h5(f'4Dmytro/inls_dfe_{seq}_submission.h5')
     return  out_model, inls
 
 def evaluate_results(submission, split = 'val'):
@@ -153,7 +164,7 @@ if __name__ == '__main__':
         help='split to run on. Can be val or test')
     parser.add_argument(
         "--method", default='cv2F', type=str,
-        help=' can be cv2f, pyransac, degensac, sklearn' )
+        help=' can be cv2f, pyransac, degensac, sklearn, load_dfe' )
     parser.add_argument(
         "--inlier_th",
         default=0.75,
@@ -191,7 +202,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2f', 'pyransac', 'degensac', 'sklearn']:
+    if args.method.lower() not in ['cv2f','cv2eimg', 'pyransac', 'degensac', 'sklearn', 'load_dfe']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':
