@@ -15,6 +15,15 @@ from skimage.transform import EssentialMatrixTransform
 import multiprocessing
 
 from joblib import Parallel, delayed
+try:
+    from third_party.NM_Net_v2 import NMNET22
+    import torch
+except Exception as e:
+    print (e)
+    sys.exit(0)
+    pass
+
+
 
 def get_single_result(ms, m, method, K1, K2, params):
     mask = ms <= params['match_th']
@@ -54,6 +63,9 @@ def get_single_result(ms, m, method, K1, K2, params):
             final_inliers[tentative_idxs[i]] = x
     return E, final_inliers
 
+def get_single_result_nmnet(model,ms, m, method, params, K1, K2):
+    E, mask = model.predict_E(m, K1, K2 )
+    return E, mask
         
 def create_E_submission(IN_DIR,seq,  method, params = {}):
     out_model = {}
@@ -62,11 +74,19 @@ def create_E_submission(IN_DIR,seq,  method, params = {}):
     matches_scores = load_h5(f'{IN_DIR}/{seq}/match_conf.h5')
     K1_K2 = load_h5(f'{IN_DIR}/{seq}/K1_K2.h5')
     keys = [k for k in matches.keys()]
-    results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, K1_K2[k][0][0], K1_K2[k][0][1], params) for k in tqdm(keys))
-    for i, k in enumerate(keys):
-        v = results[i]
-        out_model[k] = v[0]
-        inls[k] = v[1]
+    if method == 'nmnet2':
+        model = NMNET22('third_party/model.pth')
+        results = [get_single_result_nmnet(model, matches_scores[k], matches[k], method, params, K1_K2[k][0][0], K1_K2[k][0][1]) for k in tqdm(keys) ]
+        for i, k in enumerate(keys):
+            v = results[i]
+            out_model[k] = v[0]
+            inls[k] = v[1]
+    else:
+        results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, K1_K2[k][0][0], K1_K2[k][0][1], params) for k in tqdm(keys))
+        for i, k in enumerate(keys):
+            v = results[i]
+            out_model[k] = v[0]
+            inls[k] = v[1]
     return  out_model, inls
 
 def evaluate_results(submission, split = 'val'):
@@ -182,7 +202,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2e', 'sklearn']:
+    if args.method.lower() not in ['cv2e', 'sklearn', 'nmnet2', 'oanet2']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':

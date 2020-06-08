@@ -15,6 +15,14 @@ from skimage.transform import FundamentalMatrixTransform
 import multiprocessing
 
 from joblib import Parallel, delayed
+import PIL
+try:
+    from third_party.NM_Net_v2 import NMNET22
+    import torch
+except Exception as e:
+    print (e)
+    sys.exit(0)
+    pass
 
 def get_single_result(ms, m, method, params):
     mask = ms <= params['match_th']
@@ -71,6 +79,11 @@ def get_single_result(ms, m, method, params):
             final_inliers[tentative_idxs[i]] = x
     return F, final_inliers
 
+def get_single_result_nmnet(model,ms, m, method, params, w1, h1, w2, h2):
+    with torch.no_grad():
+        F, mask = model.predict_F(m, w1, h1, w2, h2)
+    return F, mask
+
         
 def create_F_submission(IN_DIR,seq,  method, params = {}):
     out_model = {}
@@ -78,15 +91,33 @@ def create_F_submission(IN_DIR,seq,  method, params = {}):
     matches = load_h5(f'{IN_DIR}/{seq}/matches.h5')
     matches_scores = load_h5(f'{IN_DIR}/{seq}/match_conf.h5')
     keys = [k for k in matches.keys()]
-    if method != 'load_dfe':
+    if method == 'nmnet2':
+        model = NMNET22('third_party/model.pth')
+        img_names = set()
+        for k in keys:
+            k1,k2 = k.split('-')
+            img_names.add(k1)
+            img_names.add(k2)
+        img_names = list(img_names)
+        wh = {}
+        for fname in img_names:
+            img = PIL.Image.open(f'{IN_DIR}/{seq}/images/{fname}.jpg')
+            w,h = img.size
+            wh[fname] = (w,h)
+        results = [get_single_result_nmnet(model, matches_scores[k], matches[k], method, params, *(wh[k.split('-')[0]]), *(wh[k.split('-')[1]])) for k in tqdm(keys) ]
+        for i, k in enumerate(keys):
+            v = results[i]
+            out_model[k] = v[0]
+            inls[k] = v[1]
+    elif method == 'load_dfe':
+        out_model = load_h5(f'4Dmytro/F_dfe_{seq}_submission.h5')
+        inls = load_h5(f'4Dmytro/inls_dfe_{seq}_submission.h5')
+    else:
         results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
         for i, k in enumerate(keys):
             v = results[i]
             out_model[k] = v[0]
             inls[k] = v[1]
-    else:
-        out_model = load_h5(f'4Dmytro/F_dfe_{seq}_submission.h5')
-        inls = load_h5(f'4Dmytro/inls_dfe_{seq}_submission.h5')
     return  out_model, inls
 
 def evaluate_results(submission, split = 'val'):
@@ -202,7 +233,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2f','cv2eimg', 'pyransac', 'degensac', 'sklearn', 'load_dfe']:
+    if args.method.lower() not in ['cv2f','cv2eimg', 'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':
@@ -234,7 +265,3 @@ if __name__ == '__main__':
             save_h5(models, out_models_fname)
             save_h5(inlier_masks, out_inliers_fname)
     print ('Done!')
-        
-        
-
-
