@@ -252,3 +252,19 @@ def get_output_dir(problem: str, split: str, method: str, params: dict):
 
 
 
+# from ACNe code
+def compute_T_with_imagesize(w, h, f=None, ratio=1.0):
+    cx = (w - 1.0) * 0.5
+    cy = (h - 1.0) * 0.5
+    mean = np.array([cx, cy])
+    if f is not None:
+        f = f
+    else:
+        f = max(w - 1.0, h - 1.0) * ratio
+
+    scale = 1.0 / f
+    T = np.zeros((3, 3,))
+    T[0, 0], T[1, 1], T[2, 2] = scale, scale, 1
+    T[0, 2], T[1, 2] = -scale * mean[0], -scale * mean[1]
+
+    return T.copy()
