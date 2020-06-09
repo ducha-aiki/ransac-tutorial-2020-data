@@ -35,8 +35,15 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
         T2 = T[img_id2]
         dR = np.dot(R2, R1.T)
         dT = T2 - np.dot(dR, T1)
-        pts1 = m[inl_mask[k].astype(bool),:2] # coordinates in image 1
-        pts2 = m[inl_mask[k].astype(bool),2:]  # coordinates in image 2
+        if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
+            pts1 = inl_mask[k][:, :2] # coordinates in image 1
+            pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
+        elif args.method.lower() == 'load_oanet_ransac': #They provided not the mask, but actual correspondences
+            pts1 = inl_mask[k][:, :2] # coordinates in image 1
+            pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
+        else:
+            pts1 = m[inl_mask[k].astype(bool),:2] # coordinates in image 1
+            pts2 = m[inl_mask[k].astype(bool),2:]  # coordinates in image 2
         p1n = normalize_keypoints(pts1, K1).astype(np.float64)
         p2n = normalize_keypoints(pts2, K2).astype(np.float64)
         ang_errors[k] = max(eval_essential_matrix(p1n, p2n, E.reshape(3,3), dR, dT))
@@ -91,11 +98,13 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2e', 'nmnet2', 'sklearn', 'cne', 'acne']:
+    if args.method.lower() not in ['cv2e', 'nmnet2', 'sklearn', 'cne', 'acne', 'load_oanet', 'load_oanet_ransac']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':
         NUM_RUNS = 3
+    if args.method.lower()  in ['nmnet2', 'cne', 'acne']:
+        NUM_RUNS=1
     params = {"maxiter": args.maxiter,
               "inl_th": args.inlier_th,
               "conf": args.conf,

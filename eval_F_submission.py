@@ -12,18 +12,6 @@ import argparse
 
 
         
-def create_F_submission(IN_DIR, seq,  method, params = {}):
-    out_model = {}
-    inls = {}
-    matches = load_h5(f'{IN_DIR}/{seq}/matches.h5')
-    matches_scores = load_h5(f'{IN_DIR}/{seq}/match_conf.h5')
-    keys = [k for k in matches.keys()]
-    results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
-    for i, k in enumerate(keys):
-        v = results[i]
-        out_model[k] = v[0]
-        inls[k] = v[1]
-    return  out_model, inls
 
 def evaluate_results(IN_DIR, seq,  models, inliers):
     ang_errors = {}
@@ -51,8 +39,15 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
         T2 = T[img_id2]
         dR = np.dot(R2, R1.T)
         dT = T2 - np.dot(dR, T1)
-        pts1 = m[inl_mask[k],:2] # coordinates in image 1
-        pts2 = m[inl_mask[k],2:]  # coordinates in image 2
+        if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
+            pts1 = inl_mask[k][:, :2] # coordinates in image 1
+            pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
+        elif args.method.lower() == 'load_oanet_degensac': #They provided not the mask, but actual correspondences
+            pts1 = inl_mask[k][:, :2] # coordinates in image 1
+            pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
+        else:
+            pts1 = m[inl_mask[k],:2] # coordinates in image 1
+            pts2 = m[inl_mask[k],2:]  # coordinates in image 2
         p1n = normalize_keypoints(pts1, K1)
         p2n = normalize_keypoints(pts2, K2)
         ang_errors[k] = max(eval_essential_matrix(p1n, p2n, E_cv_from_F, dR, dT))
@@ -107,7 +102,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2f', 'kornia', 'cv2eimg','pyransac', 'load_dfe', 'nmnet2', 'degensac', 'sklearn', 'cne', 'acne']:
+    if args.method.lower() not in ['cv2f', 'kornia', 'cv2eimg','load_oanet','load_oanet_degensac', 'pyransac', 'load_dfe', 'nmnet2', 'degensac', 'sklearn', 'cne', 'acne']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':

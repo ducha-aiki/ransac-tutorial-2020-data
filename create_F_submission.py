@@ -37,7 +37,7 @@ def kornia_find_fundamental_wdlt(points1: torch.Tensor,
     F = KG.find_fundamental(points1, points2, weights)
     for i in range(params['maxiter']):
         error = KG.epipolar.metrics.symmetrical_epipolar_distance(points1, points2, F)
-        error_norm = TF.normalize(1.0 / (error + 0.1), dim=1, p=params['conf'])
+        error_norm = TF.normalize(1.0 / (error + 1e-5), dim=1, p=params['conf'])
         F = KG.find_fundamental(points1, points2, error_norm)
     error = KG.epipolar.metrics.symmetrical_epipolar_distance(points1, points2, F)
     mask = error <= params['inl_th']
@@ -162,6 +162,12 @@ def create_F_submission(IN_DIR,seq,  method, params = {}):
     elif method == 'load_dfe':
         out_model = load_h5(f'4Dmytro/F_dfe_{seq}_submission.h5')
         inls = load_h5(f'4Dmytro/inls_dfe_{seq}_submission.h5')
+    elif method == 'load_oanet':
+        out_model = load_h5(f'oanet/fundamental_{args.split}/{seq}/F_weighted.h5')
+        inls = load_h5(f'oanet/fundamental_{args.split}/{seq}/corr_th.h5')
+    elif method == 'load_oanet_degensac':
+        out_model = load_h5(f'oanet/fundamental_{args.split}/{seq}/F_post.h5')
+        inls = load_h5(f'oanet/fundamental_{args.split}/{seq}/corr_post.h5')
     else:
         results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
         for i, k in enumerate(keys):
@@ -237,7 +243,7 @@ def grid_search_hypers_opencv(INL_THs = [0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
     return inl_good, match_good, max_MAA
 
 if __name__ == '__main__':
-    supported_methods = ['kornia', 'cv2f','cv2eimg',  'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']
+    supported_methods = ['kornia', 'cv2f','cv2eimg','load_oanet', 'load_oanet_degensac',  'pyransac', 'degensac', 'sklearn', 'load_dfe', 'nmnet2']
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--split",

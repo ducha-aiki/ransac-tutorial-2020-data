@@ -82,6 +82,12 @@ def create_E_submission(IN_DIR,seq,  method, params = {}):
             v = results[i]
             out_model[k] = v[0]
             inls[k] = v[1]
+    elif method == 'load_oanet':
+        out_model = load_h5(f'oanet/essential_{args.split}/{seq}/E_weighted.h5')
+        inls = load_h5(f'oanet/essential_{args.split}/{seq}/corr_th.h5')
+    elif method == 'load_oanet_ransac':
+        out_model = load_h5(f'oanet/essential_{args.split}/{seq}/E_post.h5')
+        inls = load_h5(f'oanet/essential_{args.split}/{seq}/corr_post.h5')
     else:
         results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, K1_K2[k][0][0], K1_K2[k][0][1], params) for k in tqdm(keys))
         for i, k in enumerate(keys):
@@ -128,33 +134,6 @@ def evaluate_results(submission, split = 'val'):
     return ang_errors
 
 
-def grid_search_hypers_opencv(INL_THs = [0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
-                             MATCH_THs = [0.75, 0.8, 0.85, 0.9, 0.95]):
-    res = {}
-    for inl_th in INL_THs:
-        for match_th in MATCH_THs:
-            key = f'{inl_th}_{match_th}'
-            print (f"inlier_th = {inl_th}, snn_ration = {match_th}")
-            cv2_results = create_E_submission_cv2(split = 'val',
-                                                inlier_th = inl_th,
-                                                match_th = match_th)
-            MAEs = evaluate_results(cv2_results, 'val')
-            mAA = calc_mAA_FE(MAEs)
-            final = 0
-            for k,v in mAA.items():
-                final+= v / float(len(mAA))
-            print (f'Validation mAA = {final}')
-            res[key] = final
-    max_MAA = 0
-    inl_good = 0
-    match_good = 0
-    for k, v in res.items():
-        if max_MAA < v:
-            max_MAA = v
-            pars = k.split('_')
-            match_good = float(pars[1])
-            inl_good =  float(pars[0])
-    return inl_good, match_good, max_MAA
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -203,7 +182,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2e', 'sklearn', 'nmnet2', 'oanet2']:
+    if args.method.lower() not in ['cv2e', 'sklearn', 'nmnet2', 'oanet2', 'load_oanet', 'load_oanet_ransac']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':
