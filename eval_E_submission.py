@@ -88,6 +88,11 @@ if __name__ == '__main__':
         type=bool,
         help='Force recompute if exists')
     parser.add_argument(
+        "--upgraded",
+        default=False,
+        type=bool,
+        help='for processing 5pt-postprocessed after deep methods')
+    parser.add_argument(
         "--data_dir",
         default='f_data',
         type=str,
@@ -98,7 +103,7 @@ if __name__ == '__main__':
     if args.split not in ['val', 'test']:
         raise ValueError('Unknown value for --split')
     
-    if args.method.lower() not in ['cv2e', 'nmnet2', 'sklearn', 'cne', 'acne', 'load_oanet', 'load_oanet_ransac']:
+    if args.method.lower() not in ['cv2e', 'nmnet2','load_dfe', 'sklearn', 'cne', 'acne', 'load_oanet', 'load_oanet_ransac']:
         raise ValueError('Unknown value for --method')
     NUM_RUNS = 1
     if args.split == 'test':
@@ -117,14 +122,17 @@ if __name__ == '__main__':
         os.makedirs(OUT_DIR)
     num_cores = int(len(os.sched_getaffinity(0)) * 0.9)
     all_maas = []
+    suf = ''
+    if args.upgraded:
+        suf='_upgraded'
     for run in range(NUM_RUNS):
         seqs = os.listdir(IN_DIR)
         for seq in seqs:
             print (f'Working on {seq}')
-            in_models_fname = os.path.join(OUT_DIR, f'submission_models_seq_{seq}_run_{run}.h5')
-            in_inliers_fname = os.path.join(OUT_DIR, f'submission_inliers_seq_{seq}_run_{run}.h5')
-            out_errors_fname = os.path.join(OUT_DIR, f'errors_seq_{seq}_run_{run}.h5')
-            out_maa_fname = os.path.join(OUT_DIR, f'maa_seq_{seq}_run_{run}.h5')
+            in_models_fname = os.path.join(OUT_DIR, f'submission{suf}_models_seq_{seq}_run_{run}.h5')
+            in_inliers_fname = os.path.join(OUT_DIR, f'submission{suf}_inliers_seq_{seq}_run_{run}.h5')
+            out_errors_fname = os.path.join(OUT_DIR, f'errors{suf}_seq_{seq}_run_{run}.h5')
+            out_maa_fname = os.path.join(OUT_DIR, f'maa{suf}_seq_{seq}_run_{run}.h5')
             if not os.path.isfile(in_models_fname) or not os.path.isfile(in_inliers_fname):
                 print (f"Submission file {in_inliers_fname} is missing, cannot evaluate, skipping")
                 continue
@@ -140,7 +148,7 @@ if __name__ == '__main__':
             print (f" mAA {seq} = {mAA[seq]:.5f}")
             save_h5({"mAA": mAA[seq]}, out_maa_fname)
             all_maas.append(mAA[seq])
-    out_maa_final_fname = os.path.join(OUT_DIR, f'maa_FINAL.h5')
+    out_maa_final_fname = os.path.join(OUT_DIR, f'maa{suf}_FINAL.h5')
     final_mAA = (np.array(all_maas)).mean()
     print (f" mAA total = {final_mAA:.5f}")
     save_h5({"mAA": final_mAA}, out_maa_final_fname)

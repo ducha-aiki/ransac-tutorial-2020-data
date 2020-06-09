@@ -64,6 +64,43 @@ def get_single_result(ms, m, method, K1, K2, params):
             final_inliers[tentative_idxs[i]] = x
     return E, final_inliers
 
+def get_single_result_filtered(m, mask, method, K1, K2, params):
+    tentatives = m[mask]
+    tentative_idxs = np.arange(len(mask))[mask]
+    src_pts = normalize_keypoints(tentatives[:, :2], K1)
+    dst_pts = normalize_keypoints(tentatives[:, 2:], K2)
+    
+    if tentatives.shape[0] <= 10:
+        return np.eye(3), np.array([False] * len(mask))
+    if method == 'cv2e':
+        E, mask_inl = cv2.findEssentialMat(src_pts, dst_pts, 
+                                           np.eye(3), cv2.RANSAC, 
+                                           threshold=params['inl_th'],
+                                           prob=params['conf'])
+        mask_inl = mask_inl.astype(bool).flatten()
+    elif method  == 'sklearn':
+        try:
+            #print(src_pts.shape, dst_pts.shape)
+            E, mask_inl = skransac([src_pts, dst_pts],
+                        EssentialMatrixTransform,
+                        min_samples=8,
+                        residual_threshold=params['inl_th'],
+                        max_trials=params['maxiter'],
+                        stop_probability=params['conf'])
+            mask_inl = mask_inl.astype(bool).flatten()
+            E = E.params
+        except Exception as e:
+            print ("Fail!", e)
+            return np.eye(3), np.array([False] * len(mask))
+    else:
+        raise ValueError('Unknown method')
+    
+    final_inliers = np.array([False] * len(mask))
+    if E is not None:
+        for i, x in enumerate(mask_inl):
+            final_inliers[tentative_idxs[i]] = x
+    return E, final_inliers
+
 def get_single_result_nmnet(model,ms, m, method, params, K1, K2):
     E, mask = model.predict_E(m, K1, K2 )
     return E, mask
@@ -197,7 +234,7 @@ if __name__ == '__main__':
     IN_DIR = os.path.join(args.data_dir, args.split) 
     if not os.path.isdir(OUT_DIR):
         os.makedirs(OUT_DIR)
-    num_cores = int(len(os.sched_getaffinity(0)) * 0.9)
+    num_cores = int(len(os.sched_getaffinity(0)) * 0.6)
     for run in range(NUM_RUNS):
         seqs = os.listdir(IN_DIR)
         for seq in seqs:

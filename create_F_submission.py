@@ -19,7 +19,6 @@ import PIL
 try:
     from third_party.NM_Net_v2 import NMNET22
     import torch
-
     import kornia.geometry as KG
     import torch.nn.functional as TF
 except Exception as e:
@@ -66,6 +65,7 @@ def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2
         pts1 = torch.from_numpy(src_pts).view(1, -1, 2)
         pts2 = torch.from_numpy(dst_pts).view(1, -1, 2)
         weights = torch.from_numpy(1.0-ms).view(1, -1).pow(params['match_th'])
+        weights = TF.normalize(weights, dim=1)
         F, mask_inl = kornia_find_fundamental_wdlt(pts1.float(), pts2.float(), weights.float(), params)
     elif method == 'cv2eimg':
         K1 = compute_T_with_imagesize(w1,h1)

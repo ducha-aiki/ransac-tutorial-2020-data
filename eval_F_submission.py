@@ -107,6 +107,8 @@ if __name__ == '__main__':
     NUM_RUNS = 1
     if args.split == 'test':
         NUM_RUNS = 3
+    if args.method.lower() in ['load_oanet','load_oanet_degensac',  'load_dfe', 'nmnet2', 'cne', 'acne']:
+        NUM_RUNS=1
     params = {"maxiter": args.maxiter,
               "inl_th": args.inlier_th,
               "conf": args.conf,
