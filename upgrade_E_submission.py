@@ -24,6 +24,7 @@ def get_single_result(ms, m, method, K1, K2, params):
     if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
         tentatives = ms
     else:
+        final_inliers = np.array([False] * len(mask))
         mask = ms
         tentatives = m[mask]
         tentative_idxs = np.arange(len(mask))[mask]
@@ -37,7 +38,6 @@ def get_single_result(ms, m, method, K1, K2, params):
                                         threshold=0.0002,
                                         prob=0.999)
     mask_inl = mask_inl.astype(bool).flatten()
-    final_inliers = np.array([False] * len(mask))
     if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
         final_inliers = tentatives[mask_inl]
     else:
