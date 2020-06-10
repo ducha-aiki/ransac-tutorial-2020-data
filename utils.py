@@ -239,6 +239,18 @@ def get_h_imgpair(key, dataset, split = 'val'):
     img2 = cv2.cvtColor(cv2.imread(img2_fname), cv2.COLOR_BGR2RGB)
     return img1, img2
 
+def get_h_imgpair2(key, DIR):
+    if 'EVD' in DIR:
+        img1_fname = f'{DIR}/imgs/1/' + key.split('-')[0] + '.png'
+        img2_fname = f'{DIR}/imgs/2/' + key.split('-')[0] + '.png'
+    elif 'HPatchesSeq' in DIR:
+        img1_fname = f'{DIR}/imgs/{key[:-4]}/1.ppm'
+        img2_fname = f'{DIR}/imgs/{key[:-4]}/{key[-1]}.ppm'
+    else:
+        raise ValueError ('Unknown dataset, try EVD or HPatchesSeq')
+    img1 = cv2.cvtColor(cv2.imread(img1_fname), cv2.COLOR_BGR2RGB)
+    img2 = cv2.cvtColor(cv2.imread(img2_fname), cv2.COLOR_BGR2RGB)
+    return img1, img2
 
 def get_output_dir(problem: str, split: str, method: str, params: dict):
     problem = problem.lower()
