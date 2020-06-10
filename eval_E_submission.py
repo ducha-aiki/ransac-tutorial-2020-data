@@ -38,6 +38,7 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
         if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
             pts1 = inl_mask[k][:, :2] # coordinates in image 1
             pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
+            #print (pts1.shape)
         elif args.method.lower() == 'load_oanet_ransac': #They provided not the mask, but actual correspondences
             pts1 = inl_mask[k][:, :2] # coordinates in image 1
             pts2 = inl_mask[k][:, 2:]  # coordinates in image 2
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     NUM_RUNS = 1
     if args.split == 'test':
         NUM_RUNS = 3
-    if args.method.lower()  in ['nmnet2', 'cne', 'acne']:
+    if args.method.lower()  in ['nmnet2', 'cne', 'acne', 'load_oanet']:
         NUM_RUNS=1
     params = {"maxiter": args.maxiter,
               "inl_th": args.inlier_th,

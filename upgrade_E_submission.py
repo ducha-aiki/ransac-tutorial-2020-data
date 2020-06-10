@@ -23,21 +23,25 @@ import sys
 def get_single_result(ms, m, method, K1, K2, params):
     if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
         tentatives = ms
+        src_pts = tentatives[:, :2]
+        dst_pts = tentatives[:, 2:]
+        if tentatives.shape[0] <= 10:
+            return np.eye(3), tentatives
     else:
         final_inliers = np.array([False] * len(mask))
         mask = ms
         tentatives = m[mask]
         tentative_idxs = np.arange(len(mask))[mask]
-    src_pts = normalize_keypoints(tentatives[:, :2], K1)
-    dst_pts = normalize_keypoints(tentatives[:, 2:], K2)
-    
-    if tentatives.shape[0] <= 10:
-        return np.eye(3), np.array([False] * len(mask))
+        if tentatives.shape[0] <= 10:
+            return np.eye(3), np.array([False] * len(mask))
+        src_pts = normalize_keypoints(tentatives[:, :2], K1)
+        dst_pts = normalize_keypoints(tentatives[:, 2:], K2)
     E, mask_inl = cv2.findEssentialMat(src_pts, dst_pts, 
                                         np.eye(3), cv2.RANSAC, 
                                         threshold=0.0002,
                                         prob=0.999)
     mask_inl = mask_inl.astype(bool).flatten()
+    #print (mask_inl.sum())
     if args.method.lower() == 'load_oanet': #They provided not the mask, but actual correspondences
         final_inliers = tentatives[mask_inl]
     else:
@@ -165,7 +169,7 @@ if __name__ == '__main__':
         os.makedirs(OUT_DIR)
     num_cores = int(len(os.sched_getaffinity(0)) * 0.9)
     for run in range(NUM_RUNS):
-        seqs = os.listdir(IN_DIR)
+        seqs = sorted(os.listdir(IN_DIR))
         for seq in seqs:
             print (f'Working on {seq}')
             in_models_fname = os.path.join(OUT_DIR, f'submission_models_seq_{seq}_run_{run}.h5')
