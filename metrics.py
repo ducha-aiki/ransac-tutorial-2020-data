@@ -17,12 +17,13 @@ def get_visible_part_mean_absolute_reprojection_error(img1, img2, H_gt, H):
     xy_rep_gt = cv2.perspectiveTransform(coords.reshape(-1, 1,2).astype(np.float32), H_gt.astype(np.float32)).squeeze(1)
     xy_rep_estimated = cv2.perspectiveTransform(coords.reshape(-1, 1,2).astype(np.float32),
                                                 H.astype(np.float32)).squeeze(1)
-    error = np.abs(xy_rep_gt-xy_rep_estimated).sum(axis=1).reshape(xg.shape) * mask1inback
+    #error = np.abs(xy_rep_gt-xy_rep_estimated).sum(axis=1).reshape(xg.shape) * mask1inback
+    error = np.sqrt(((xy_rep_gt-xy_rep_estimated)**2).sum(axis=1)).reshape(xg.shape) * mask1inback
     mean_error = error.sum() / mask1inback.sum()
     return mean_error
 
 
-def calc_mAA(MAEs, ths = np.logspace(np.log2(0.5), np.log2(10), 10, base=2.0)):
+def calc_mAA(MAEs, ths = np.logspace(np.log2(1.0), np.log2(20), 10, base=2.0)):
     res = {}
     for ds_name, MAEs_cur in MAEs.items():
         cur_results = []
