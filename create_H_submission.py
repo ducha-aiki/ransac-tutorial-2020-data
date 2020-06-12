@@ -67,7 +67,7 @@ def create_H_submission(IN_DIR, seq,  method, params = {}):
     matches = load_h5(f'{IN_DIR}/matches.h5')
     matches_scores = load_h5(f'{IN_DIR}/match_conf.h5')
     keys = [k for k in matches.keys()]
-    results = Parallel(n_jobs=num_cores)(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
+    results = Parallel(n_jobs=min(num_cores,len(keys)))(delayed(get_single_result)(matches_scores[k], matches[k], method, params) for k in tqdm(keys))
     for i, k in enumerate(keys):
         v = results[i]
         out_model[k] = v[0]
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     IN_DIR = args.data_dir
     if not os.path.isdir(OUT_DIR):
         os.makedirs(OUT_DIR)
-    num_cores = int(len(os.sched_getaffinity(0)) * 0.9)
+    num_cores = int(len(os.sched_getaffinity(0)) * 0.5)
     for run in range(NUM_RUNS):
         seqs = os.listdir(IN_DIR)
         for seq in seqs:
