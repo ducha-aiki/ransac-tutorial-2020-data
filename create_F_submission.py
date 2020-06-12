@@ -42,6 +42,30 @@ def kornia_find_fundamental_wdlt(points1: torch.Tensor,
     mask = error <= params['inl_th']
     return F.detach().cpu().numpy().reshape(3,3), mask.detach().cpu().numpy().reshape(-1)
 
+def norm_test_data(xs_initial, w1,h1,w2,h2):
+    cx1 = (w1 - 1.0) * 0.5
+    cy1 = (h1 - 1.0) * 0.5
+    f1 = max(h1 - 1.0, w1 - 1.0)
+    scale1 = 1.0 / f1
+
+    T1 = np.zeros((3, 3,))
+    T1[0, 0], T1[1, 1], T1[2, 2] = scale1, scale1, 1
+    T1[0, 2], T1[1, 2] = -scale1 * cx1, -scale1 * cy1
+
+    cx2 = (w2 - 1.0) * 0.5
+    cy2 = (h2 - 1.0) * 0.5
+    f2 = max(h2 - 1.0, w2 - 1.0)
+    scale2 = 1.0 / f2
+
+    T2 = np.zeros((3, 3,))
+    T2[0, 0], T2[1, 1], T2[2, 2] = scale2, scale2, 1
+    T2[0, 2], T2[1, 2] = -scale2 * cx2, -scale2 * cy2
+
+    kp1 = (xs_initial[:, :2] - np.asarray([cx1, cy1])) / np.asarray([f1, f1])
+    kp2 = (xs_initial[:, 2:] - np.asarray([cx2, cy2])) / np.asarray([f2, f2])
+
+    xs = np.concatenate([kp1, kp2], axis=-1)
+    return xs, T1, T2
 
 def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2  = None):
     mask = ms <= params['match_th']
@@ -68,15 +92,19 @@ def get_single_result(ms, m, method, params, w1 = None, h1 = None, w2 = None, h2
         weights = TF.normalize(weights, dim=1)
         F, mask_inl = kornia_find_fundamental_wdlt(pts1.float(), pts2.float(), weights.float(), params)
     elif method == 'cv2eimg':
-        K1 = compute_T_with_imagesize(w1,h1)
-        K2 = compute_T_with_imagesize(w2,h2)
-        src_pts = normalize_keypoints(src_pts, K1)
-        dst_pts = normalize_keypoints(dst_pts, K2)
-        E, mask_inl = cv2.findEssentialMat(src_pts, dst_pts, 
+        tent_norm, T1, T2 = norm_test_data(tentatives, w1,h1,w2,h2)
+        #print (T1)
+        #K1 = compute_T_with_imagesize(w1,h1)
+        #K2 = compute_T_with_imagesize(w2,h2)
+        #print (K1, K2)
+        #src_pts = normalize_keypoints(src_pts, K1)
+        #dst_pts = normalize_keypoints(dst_pts, K2)
+        #print (src_pts)
+        E, mask_inl = cv2.findEssentialMat(tent_norm[:, :2], tent_norm[:, 2:], 
                                            np.eye(3), cv2.RANSAC, 
                                            threshold=params['inl_th'],
                                            prob=params['conf'])
-        F = np.matmul(np.matmul(K2.T, E), K1)
+        F = np.matmul(np.matmul(T2.T, E), T1)
     elif method  == 'pyransac':
         F, mask_inl = pydegensac.findFundamentalMatrix(src_pts, dst_pts, 
                                                 params['inl_th'],
