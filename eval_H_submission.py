@@ -23,8 +23,8 @@ def evaluate_results(IN_DIR, seq,  models, inliers):
     Hgt_dict = load_h5(f'{IN_DIR}/Hgt.h5')
     H_pred, inl_mask = models, inliers
     keys = sorted([k for k in H_pred.keys()])
-    num_cores = int(len(os.sched_getaffinity(0)) * 0.9)
-    results = Parallel(n_jobs=num_cores)(delayed(eval_single_result)(k, Hgt_dict[k], H_pred[k], IN_DIR) for k in tqdm(keys))
+    num_cores = int(len(os.sched_getaffinity(0)) * 0.5)
+    results = Parallel(n_jobs=min(num_cores,len(keys)))(delayed(eval_single_result)(k, Hgt_dict[k], H_pred[k], IN_DIR) for k in tqdm(keys))
     for i, k in enumerate(keys):
         MAEs[k] = v = results[i]
     return MAEs
@@ -96,9 +96,11 @@ if __name__ == '__main__':
         os.makedirs(OUT_DIR)
     num_cores = int(len(os.sched_getaffinity(0)) * 0.5)
     all_maas = []
-    for run in range(NUM_RUNS):
-        seqs = os.listdir(IN_DIR)
-        for seq in seqs:
+    all_maas_per_seq = {}
+    seqs = os.listdir(IN_DIR)
+    for seq in seqs:
+        all_maas_per_seq[seq] = []
+        for run in range(NUM_RUNS):
             IN_DIR_CURRENT = os.path.join(IN_DIR, seq, args.split)
             print (f'Working on {seq}')
             in_models_fname = os.path.join(OUT_DIR, f'submission_models_seq_{seq}_run_{run}.h5')
@@ -120,6 +122,10 @@ if __name__ == '__main__':
             print (f" mAA {seq} = {mAA[seq]:.5f}")
             save_h5({"mAA": mAA[seq]}, out_maa_fname)
             all_maas.append(mAA[seq])
+            all_maas_per_seq[seq].append(mAA[seq])
+    print (OUT_DIR)
+    for k, v in all_maas_per_seq.items():
+        print (k, np.array(v).mean())    
     out_maa_final_fname = os.path.join(OUT_DIR, f'maa_FINAL.h5')
     final_mAA = (np.array(all_maas)).mean()
     print (f" mAA total = {final_mAA:.5f}")
