@@ -6,7 +6,7 @@ Training and validation data you can download from http://cmp.felk.cvut.cz/~mish
 It was obtained with RootSIFT features and mutual nearest neighbour matching.
 12 scenes, 100k image pairs each, so 1.2M cases for training, 86 Gb.
 
-Validation-only set is available from [here](http://ptak.felk.cvut.cz/personal/mishkdmy/CVPR2020-RANSAC-Tutorial/RANSAC-Tutorial-Data-ValOnly.tar). It is 2.1Gb.
+Validation-only set is available from [here](http://cmp.felk.cvut.cz/~mishkdmy/CVPR-RANSAC-Tutorial-2020/RANSAC-Tutorial-Data-ValOnly.tar). It is 2.1Gb.
 
 Correspondences, which are obtained without mutual nearest neighbor check are available from [here](http://ptak.felk.cvut.cz/personal/mishkdmy/CVPR2020-RANSAC-Tutorial/RANSAC-Tutorial-Data-uni.tar), 349 Gb.
 
